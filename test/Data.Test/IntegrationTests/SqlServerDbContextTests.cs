@@ -1,6 +1,6 @@
-namespace Example.Data.Test.UnitTests;
+namespace Example.Data.Test.IntegrationTests;
 
-public class SqliteDbContextTests
+public class SqlServerDbContextTests
 {
   public async Task CreateDatabaseWorks()
   {
