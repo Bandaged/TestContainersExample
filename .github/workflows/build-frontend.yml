@@ -1,0 +1,40 @@
+on: 
+  pull_request:
+    paths:
+      - 'src/Frontend/**'
+      - 'src/Api.Dto/**'
+      - 'test/Frontend.Test/**'
+      - 'test/Shared.Test/**'
+
+jobs:
+  dotnet-build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - name: dotnet-lint
+        run: ./dotnet-lint-frontend.sh
+      - name: dotnet-build
+        run: ./dotnet-build-frontend.sh
+      - name: dotnet-unit-test
+        run: ./unit-test-frontend.sh
+  docker-build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - name: docker-lint
+        run: ./docker-lint-frontend.sh
+      - name: docker-build
+        run: ./docker-build-frontend.sh
+      - name: dotnet-container-test
+        run: ./container-test-frontend.sh
+

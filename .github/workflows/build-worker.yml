@@ -1,0 +1,45 @@
+on: 
+  pull_request:
+    paths:
+      - 'src/Worker/**'
+      - 'src/Worker.Abstractions/**'
+      - 'src/Worker.Services/**'
+      - 'src/Worker.Dto/**'
+      - 'src/Api.Dto/**'
+      - 'src/Data.Dto/**'
+      - 'src/Data/**'
+      - 'test/Worker.Test/**'
+      - 'test/Data.Test/**'
+      - 'test/Shared.Test/**'
+
+jobs:
+  dotnet-build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - name: dotnet-lint
+        run: ./dotnet-lint-worker.sh
+      - name: dotnet-build
+        run: ./dotnet-build-worker.sh
+      - name: dotnet-unit-test
+        run: ./unit-test-worker.sh
+  docker-build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - name: docker-lint
+        run: ./docker-lint-worker.sh
+      - name: docker-build
+        run: ./docker-build-worker.sh
+      - name: dotnet-container-test
+        run: ./container-test-worker.sh
