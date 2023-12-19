@@ -2,8 +2,10 @@ ARG DEBIAN_VERSION="latest"
 ARG K3S_INSTALL_VERSION="v1.26.5+k3s1"
 ARG KUBECTL_INSTALL_VERSION="v1.29"
 ARG MICROSOFT_DEBIAN_VERSION="12"
+
 FROM debian:${DEBIAN_VERSION}
 
+# setup required services
 RUN apt-get update -y
 RUN apt-get install -y apt-transport-https ca-certificates curl wget
 
