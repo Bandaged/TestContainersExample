@@ -7,7 +7,7 @@ FROM debian:${DEBIAN_VERSION}
 
 # setup required services
 RUN apt-get update -y
-RUN apt-get install -y apt-transport-https ca-certificates curl wget
+RUN apt-get install -y apt-transport-https ca-certificates curl wget git
 
 # setup dotnet
 RUN wget "https://packages.microsoft.com/config/debian/${MICROSOFT_DEBIAN_VERSION}/packages-microsoft-prod.deb" -O packages-microsoft-prod.deb
