@@ -14,6 +14,8 @@ on:
         required: false
         type: string
         default: ubuntu-latest
+permissions:
+  packages: write
 jobs:
   image-clean-up:
     runs-on: ${{ inputs.test-runner }}

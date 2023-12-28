@@ -1,0 +1,12 @@
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'releases/**'
+jobs:
+  ci-build:
+    uses: './.github/workflows/ci-build.yml'
+    with:
+      test-runner: ubuntu-latest
+      concurrency-group: pr-${{ github.workflow }}-${{ github.ref }}
+  

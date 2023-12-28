@@ -1,0 +1,27 @@
+on:
+  workflow_dispatch:
+    inputs:
+      e2e-test:
+        description: Run E2E tests
+        required: false
+        type: boolean
+        default: false
+      integration-test:
+        description: Run Integration tests
+        required: false
+        type: boolean
+        default: false
+      unit-test:
+        description: Run Unit tests
+        required: false
+        type: boolean
+        default: false
+jobs:
+  ci-build:
+    uses: './.github/workflows/ci-build.yml'
+    with:
+      test-runner: ubuntu-latest
+      concurrency-group: ${{ github.workflow }}-${{ github.ref }}
+      image-repo: ghrc.io
+      
+  

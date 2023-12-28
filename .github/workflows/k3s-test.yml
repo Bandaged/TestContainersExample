@@ -24,6 +24,9 @@ on:
       e2e-image:
         required: true
         type: string
+permissions:
+  contents: read
+  packages: read
 jobs:
   e2e-test:
     runs-on: ${{ inputs.test-runner }}

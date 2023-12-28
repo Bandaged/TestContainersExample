@@ -2,8 +2,9 @@ on:
   workflow_call:
     inputs:
       cache-name:
-        required: true
+        required: false
         type: string
+        default: default
       concurrency-group:
         required: true
         type: string
@@ -15,6 +16,10 @@ on:
         required: false
         type: string
         default: '7.x'
+      dotnet-setup:
+        required: false
+        type: boolean
+        default: true
     outputs:
       cache-key: ${{ jobs.shared-cache.outputs.cache-key }}
       cache-updated: ${{ jobs.shared-cache.outputs.cache-updated}}
@@ -37,6 +42,7 @@ jobs:
             *.props
             Example.sln
       - name: dotnet-setup
+        if: ${{ inputs.dotnet-setup }}
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ inputs.dotnet-version }}

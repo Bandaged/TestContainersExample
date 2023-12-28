@@ -39,6 +39,9 @@ on:
         default: latest
 jobs: 
 # dotnet test
+  dotnet-shared-cache:
+    needs: paths-filter
+    uses: './.github/workflow/dotnet-shared-cache.yml'
   dotnet-test:
     uses: './.github/workflow/dotnet-build.yml'
     with:
