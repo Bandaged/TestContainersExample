@@ -24,6 +24,7 @@ ENV DATA_SEED_TEST_FOLDER="test/Data.Seed.Test"
 
 COPY ["*.props", ""]
 COPY ["src/*.props", "src/"]
+COPY ["test/*.props", "test/"]
 COPY ["${DATA_DTO_FOLDER}/*.csproj","${DATA_DTO_FOLDER}/packages.lock.json*", "${DATA_DTO_FOLDER}/" ]
 COPY ["${DATA_FOLDER}/*.csproj","${DATA_FOLDER}/packages.lock.json*", "${DATA_FOLDER}/" ]
 COPY ["${API_DTO_FOLDER}/*.csproj","${API_DTO_FOLDER}/packages.lock.json*", "${API_DTO_FOLDER}/" ]

@@ -17,6 +17,7 @@ ENV INFRA_TEST_FOLDER="test/Frontend.Test"
 
 COPY ["*.props", ""]
 COPY ["src/*.props", "src/"]
+COPY ["test/*.props", "test/"]
 COPY ["${INFRA_FOLDER}/*.csproj","${INFRA_FOLDER}/packages.lock.json*", "${INFRA_FOLDER}/" ]
 COPY ["${INFRA_TEST_FOLDER}/*.csproj","${INFRA_TEST_FOLDER}/packages.lock.json*", "${INFRA_TEST_FOLDER}/" ]
 
