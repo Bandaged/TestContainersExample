@@ -1,6 +1,6 @@
 namespace Example.Worker.Services.Options;
 
-public class ReceiverOptions
+public class TopicNotificationOptions
 {
 
 }
