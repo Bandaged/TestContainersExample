@@ -1,0 +1,99 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      concurrency-group:
+        required: true
+        type: string
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+
+      lint:
+        required: false
+        type: boolean
+        default: true
+
+      unit-test:
+        required: false
+        type: boolean
+        default: true
+
+      publish-test-results:
+        required: false
+        type: boolean
+        default: true
+      artifact:
+        required: false
+        type: boolean
+        default: false
+      repo-name:
+        required: false
+        type: string
+        default: example
+      repo-chart-name:
+        required: false
+        type: string
+        default: example
+      chart-version:
+        required: false
+        type: string
+        default: v1.0.0
+      publish:
+        required: false
+        type: boolean
+        default: false
+      publish-artifact-name:
+        required: false
+        type: string
+        default: helm-chart
+      sparse-checkout:
+        required: false
+        type: string
+        default: |
+          k8s/**
+          scripts/helm-lint.sh
+          scripts/helm-build.sh
+          scripts/helm-unit-test.sh
+jobs:
+  helm-build:
+    runs-on: ${{ inputs.test-runner }}
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: ${{ inputs.sparse-checkout }}
+      - name: helm-lint
+        if: ${{ inputs.lint }}
+        working-directory: scripts
+        run: ./helm-lint.sh
+      - name: helm-build
+        working-directory: scripts
+        run: ./helm-build.sh
+      - name: helm-unit-test
+        if: ${{ inputs.unit-test }}
+        working-directory: scripts
+        run: ./helm-unit-test.sh
+      - name: helm-publish-test-results
+        if: ${{ inputs.publish-test-results }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: helm-unit-tests
+          path: build/TestResults/helm-test-results
+      - name: helm-artifact-chart
+        if: ${{ inputs.artifact }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.publish-artifact-name }}
+          path: build/output/chart.tar
+      - name: helm-publish-chart
+        if: ${{ inputs.publish }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.publish-artifact-name }}
+          path: build/output/chart.tar
+
+      

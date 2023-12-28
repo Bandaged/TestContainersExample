@@ -1,0 +1,211 @@
+on: 
+  workflow_call:
+    inputs:
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      concurrency-group:
+        required: true
+        type: string
+
+      publish-image:
+        required: false
+        type: boolean
+        default: false
+      publish-chart:
+        required: false
+        type: boolean
+        default: false
+      publish-migrations:
+        required: false
+        type: boolean
+        default: false
+
+      image-repo:
+        required: false
+        type: string
+        default: ''
+      image-tag:
+        required: false
+        type: string
+        default: latest
+jobs: 
+# job generate variables to filter
+  paths-filter:
+    uses: './.github/workflow/check-paths.yml'
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      concurrency-group: ${{ inputs.concurrency-group }}
+
+# api ci
+  dotnet-build-api:
+    uses: './.github/workflow/dotnet-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.api }}
+    with: 
+      name: 'api'
+      concurrency-group: dotnet-api-${{ github.workflow }}-${{ github.ref }}
+      build-folder: 'src/Api/'
+      test-folder: 'test/Api.Test/'
+      sparse-checkout: |
+        src/Api/**
+        src/Api.Abstractions/**
+        src/Api.Dto/**
+        src/Api.Services/**
+        src/Data.Dto/**
+        src/Data/**
+        test/Api.Test/**
+        test/Data.Test/**
+        test/Shared.Test/**
+  docker-build-api:
+    uses: './.github/workflow/docker-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.api || needs.path-filters.outputs.api-docker }}
+    with: 
+      service-name: 'api'
+      concurrency-group: docker-api-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api/**
+        src/Api.Abstractions/**
+        src/Api.Dto/**
+        src/Api.Services/**
+        src/Data.Dto/**
+        src/Data/**
+        test/Api.Test/**
+        test/Data.Test/**
+        test/Shared.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+
+# frontend ci
+  dotnet-build-frontend:
+    uses: './.github/workflow/dotnet-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.frontend }}
+    with: 
+      name: 'frontend'
+      concurrency-group: dotnet-frontend-${{ github.workflow }}-${{ github.ref }}
+      build-folder: 'src/Frontend/'
+      test-folder: 'test/Frontend.Test/'
+      sparse-checkout: |
+        src/Api.Dto/**
+        src/Frontend/**
+        test/Frontend.Test/**
+  docker-build-frontend:
+    uses: './.github/workflow/docker-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.frontend || needs.path-filters.outputs.frontend-docker }}
+    with: 
+      service-name: 'frontend'
+      concurrency-group: docker-frontend-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api.Dto/**
+        src/Frontend/**
+        test/Frontend.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+ 
+# Worker ci
+  dotnet-build-worker:
+    uses: './.github/workflow/dotnet-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.worker }}
+    with: 
+      name: 'worker'
+      concurrency-group: dotnet-worker-${{ github.workflow }}-${{ github.ref }}
+      build-folder: 'src/Worker/'
+      test-folder: 'test/Worker.Test/'
+      sparse-checkout: |
+        src/Api.Dto/**
+        src/Data.Dto/**
+        src/Data/**
+        src/Worker/**
+        src/Worker.Abstractions/**
+        src/Worker.Dto/**
+        src/Worker.Services/**
+        test/Data.Test/**
+        test/Shared.Test/**
+        test/Worker.Test/**
+  docker-build-worker:
+    uses: './.github/workflow/docker-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.worker || needs.path-filters.outputs.worker-docker }}
+    with: 
+      service-name: 'worker'
+      concurrency-group: docker-worker-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api.Dto/**
+        src/Data.Dto/**
+        src/Data/**
+        src/Worker/**
+        src/Worker.Abstractions/**
+        src/Worker.Dto/**
+        src/Worker.Services/**
+        test/Data.Test/**
+        test/Shared.Test/**
+        test/Worker.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+
+# infrastructure ci
+  dotnet-build-infra:
+    uses: './.github/workflow/dotnet-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.infra  }}
+    with: 
+      name: 'infra'
+      concurrency-group: dotnet-infra-${{ github.workflow }}-${{ github.ref }}
+      build-folder: 'src/Infrastructure/'
+      test-folder: 'test/Infrastructure.Test/'
+      sparse-checkout: |
+        src/Infrastructure/**
+        test/Infrastructure.Test/**
+  docker-build-infra:
+    uses: './.github/workflow/docker-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.infra || needs.path-filters.outputs.infra-docker  }}
+    with: 
+      service-name: 'infra'
+      concurrency-group: docker-infra-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Infrastructure/**
+        test/Infrastructure.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+
+# e2e ci
+  docker-build-e2e-test:
+    uses: './.github/workflow/docker-build.yml'
+    needs: paths-filter
+    if: ${{ needs.path-filters.outputs.e2e || needs.path-filters.outputs.e2e-docker  }}
+    with:
+      service-name: 'e2e-test'
+      concurrency-group: docker-e2e-test-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api.Dto/**
+        test/Data.Test/**
+        test/E2E.Test/**
+        test/Shared.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+
+# k8s ci
+  helm-build:
+    uses: './.github/workflow/helm-build.yml'
+    needs: paths-filter
+    if: needs.path-filters.outputs.k8s
+    with: 
+      name: chart
+      concurrency-group: helm-${{ github.workflow }}-${{ github.ref }}
+

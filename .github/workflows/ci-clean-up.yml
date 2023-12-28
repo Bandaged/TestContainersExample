@@ -1,0 +1,116 @@
+on:
+  workflow_call:
+    inputs:
+      migration:
+        required: true
+        type: boolean
+        default: true
+      migration-name:
+        required: false
+        type: string
+        default: migration
+      api:
+        required: true
+        type: boolean
+        default: true
+      api-image-name:
+        required: false
+        type: string
+        default: api
+      api-test:
+        required: true
+        type: boolean
+        default: true
+      api-test-image-name:
+        required: false
+        type: string
+        default: api-test
+      e2e-test:
+        required: true
+        type: boolean
+        default: true
+      e2e-test-image-name:
+        required: false
+        type: string
+        default: e2e-test
+      frontend:
+        required: true
+        type: boolean
+        default: true
+      frontend-image-name:
+        required: false
+        type: string
+        default: frontend
+      frontend-test:
+        required: true
+        type: boolean
+        default: true
+      frontend-test-image-name:
+        required: false
+        type: string
+        default: frontend-test
+      worker:
+        required: true
+        type: boolean
+        default: true
+      worker-image-name:
+        required: false
+        type: string
+        default: worker
+      worker-test:
+        required: true
+        type: boolean
+        default: true
+      worker-test-image-name:
+        required: false
+        type: string
+        default: worker-test
+jobs:
+  docker-api-clean-up:
+    uses: './.github/workflow/image-clean-up.yml'
+    if: ${{ always() && inputs.api }}
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      image-repo: ${{ inputs.image-repo }}
+      image-name: ${{ inputs.api-image-name }}
+      image-tag: ${{ inputs.image-tag }}
+  docker-api-test-clean-up:
+    uses: './.github/workflow/image-clean-up.yml'
+    if: ${{ always() && inputs.api-test }}
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      image-repo: ${{ inputs.image-repo }}
+      image-name: ${{ inputs.api-test-image-name }}
+      image-tag: ${{ inputs.image-tag }}
+  docker-worker-clean-up:
+    uses: './.github/workflow/image-clean-up.yml'
+    if: ${{ always() && inputs.worker }}
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      image-repo: ${{ inputs.image-repo }}
+      image-name: ${{ inputs.worker-image-name }}
+      image-tag: ${{ inputs.image-tag }}
+  docker-worker-test-clean-up:
+    uses: './.github/workflow/image-clean-up.yml'
+    if: ${{ always() && inputs.worker-test }}
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      image-repo: ${{ inputs.image-repo }}
+      image-name: ${{ inputs.worker-test-image-name }}
+      image-tag: ${{ inputs.image-tag }}
+  docker-e2e-test-clean-up:
+    uses: './.github/workflow/image-clean-up.yml'
+    if: ${{ always() && inputs.e2e-test }}
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      image-repo: ${{ inputs.image-repo }}
+      image-name: ${{ inputs.e2e-test-image-name }}
+      image-tag: ${{ inputs.image-tag }}
+  helm-clean-up:
+    uses: './.github/workflow/helm-clean-up.yml'
+    if: ${{ always() && inputs.e2e-test }}
+    with:
+      test-runner: ${{ inputs.test-runner }}
+      image-repo: ${{ inputs.image-repo }}
+      image-name: ${{ inputs.e2e-test-image-name }}
+      image-tag: ${{ inputs.image-tag }}

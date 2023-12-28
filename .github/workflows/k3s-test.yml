@@ -1,0 +1,106 @@
+on: 
+  workflow_call:
+    inputs:
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      concurrency-group:
+        required: true
+        type: string
+      publish-test-results:
+        required: false
+        type: boolean
+        default: true
+      api-image:
+        required: true
+        type: string
+      worker-image:
+        required: true
+        type: string
+      frontend-image:
+        required: true
+        type: string
+      e2e-image:
+        required: true
+        type: string
+jobs:
+  e2e-test:
+    runs-on: ${{ inputs.test-runner }}
+    concurrency:
+      group: ${{ inputs.concurrency-group }}
+      cancel-in-progress: true
+    services:
+      db:
+        image: mssql
+      mq:
+        image: rabbitmq
+      smb:
+        image: smb
+      blob:
+        image: minio
+      cache:
+        image: redis
+        ports:
+          - 6379:6379
+    steps:
+      - name: setup-k3s
+        run: ""
+
+      # helm
+      - name: helm-pull-chart
+        run: >
+          helm pull 
+          ${{ inputs.chart-repo-url }}
+          --version ${{ inputs.chart-version }} 
+          -d build/output/chart
+
+      # pull images
+      - name: api-pull-image
+        run: docker pull ${{ inputs.api-image }}
+      - name: frontend-pull-image
+        run: docker pull ${{ inputs.frontend-image }}
+      - name: e2e-pull-image
+        run: docker pull ${{ inputs.e2e-image }}
+      - name: worker-pull-image
+        run: docker pull ${{ inputs.worker-image }}
+
+      # move to tars
+      - name: api-save-name
+        run: docker save -o build/output/api.tar ${{ inputs.api-image }}
+      - name: frontend-save-name
+        run: docker save -o build/output/frontend.tar ${{ inputs.frontend-image }}
+      - name: e2e-save-name
+        run: docker save -o build/output/e2e.tar ${{ inputs.e2e-image }}
+      - name: worker-save-name
+        run: docker save -o build/output/worker.tar ${{ inputs.worker-image }}
+
+      # k3s import
+      - name: k3s-import-api
+        run: k3s ctr images import build/output/api.tar
+      - name: k3s-import-e2e
+        run: k3s ctr images import build/output/e2e.tar
+      - name: k3s-import-frontend
+        run: k3s ctr images import build/output/frontend.tar
+      - name: k3s-import-worker
+        run: k3s ctr images import build/output/worker.tar
+
+      # clean up
+      - name: clean-up-local-files
+        if: ${{ always() && inputs.clean-up }}
+        run: rm -rf build/output/chart
+      - name: remove-api-image
+        if: ${{ always() && inputs.clean-up }}
+        run: docker rmi ${{ inputs.api-image }}
+      - name: remove-frontend-image
+        if: ${{ always() && inputs.clean-up }}
+        run: docker rmi ${{ inputs.frontend-image }}
+      - name: remove-worker-image
+        if: ${{ always() && inputs.clean-up }}
+        run: docker rmi ${{ inputs.worker-image }}
+      - name: remove-e2e-image
+        if: ${{ always() && inputs.clean-up }}
+        run: docker rmi ${{ inputs.e2e-image }}
+        
+    
+          

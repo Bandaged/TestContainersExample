@@ -1,0 +1,50 @@
+on: 
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      concurrency-group:
+        required: true
+        type: string
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+    outputs:
+      cache-key: ${{ jobs.shared-cache.outputs.cache-key }}
+      cache-updated: ${{ jobs.shared-cache.outputs.cache-updated}}
+jobs:
+  shared-cache:
+    runs-on: ${{ inputs.test-runner }}
+    outputs:
+      cache-key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            src/**/packages.lock.json
+            src/**/*.csproj
+            src/**/*.props
+            test/**/packages.lock.json
+            test/**/*.csproj
+            test/**/*.props
+            *.props
+            Example.sln
+      - name: dotnet-cache
+        id: restore-cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ inputs.cache-name }}-${{ hashFiles('**/packages.lock.json') }}
+      - name: dotnet-restore
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: dotnet restore --locked-mode
+      - name: dotnet-save-cache
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+      - name: dotnet-cache-updated
+        run: echo "cache-updated=${{ steps.restore-cache.outputs.cache-hit }}" >> $GITHUB_OUTPUTS

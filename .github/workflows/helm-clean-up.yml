@@ -1,0 +1,22 @@
+on: 
+  workflow_call:
+    inputs:
+      helm-repo:
+        required: true
+        type: string
+      chart-name:
+        required: true
+        type: string
+      chart-version:
+        required: true
+        type: string
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+jobs:
+  helm-clean-up:
+    runs-on: ${{ inputs.test-runner }}
+    steps:
+      - 
+  

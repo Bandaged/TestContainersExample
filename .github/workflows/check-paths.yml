@@ -1,0 +1,160 @@
+on:
+  workflow_call:
+    inputs:
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      concurrency-group:
+        required: true
+        type: string
+    outputs:
+      api:
+        description: Did Api source code change?
+        value: ${{ jobs.paths-filter.outputs.api }}
+      api-docker:
+        description: Did Api docker source code change?
+        value: ${{ jobs.paths-filter.outputs.api-docker }}
+      data: 
+        description: Did Data source code change?
+        value: ${{ jobs.paths-filter.outputs.data }}
+      docs: 
+        description: Did documents source code change?
+        value: ${{ jobs.paths-filter.outputs.docs }}
+      docker:
+        description: Did shared docker source code change?
+        value: ${{ jobs.paths-filter.outputs.docker }}
+      e2e: 
+        description: Did e2e source code change?
+        value: ${{ jobs.paths-filter.outputs.e2e }}
+      e2e-docker:
+        description: Did e2e docker source code change?
+        value: ${{ jobs.paths-filter.outputs.e2e-docker }}
+      frontend: 
+        description: Did frontend source code change?
+        value: ${{ jobs.paths-filter.outputs.frontend }}
+      frontend-docker:
+        description: Did frontend docker source code change?
+        value: ${{ jobs.paths-filter.outputs.frontend-docker }}
+      infra: 
+        description: Did infrastructure source code change?
+        value: ${{ jobs.paths-filter.outputs.infra }}
+      infra-docker:
+        description: Did infrastructure docker source code change?
+        value: ${{ jobs.paths-filter.outputs.infra-docker }}
+      k8s: 
+        description: Did k8s source code change?
+        value: ${{ jobs.paths-filter.outputs.k8s }}
+      migration: 
+        description: Did data migration source code change?
+        value: ${{ jobs.paths-filter.outputs.migration }}
+      packages: 
+        description: Did the packages change?
+        value: ${{ jobs.paths-filter.outputs.packages }}
+      worker: 
+        description: Did worker source code change?
+        value: ${{ jobs.paths-filter.outputs.worker }}
+      worker-docker:
+        description: Did worker docker source code change?
+        value: ${{ jobs.paths-filter.outputs.worker-docker }}
+      workflows: 
+        description: Did workflow source code change?
+        value: ${{ jobs.paths-filter.outputs.workflows }}
+jobs:
+# job generate variables to filter
+  paths-filter:
+    runs-on: {{ inputs.test-runner }}
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      api-docker: ${{ steps.filter.outputs.api-docker }}
+      data: ${{ steps.filter.outputs.data }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      e2e-docker: ${{ steps.filter.outputs.e2e-docker }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      frontend-docker: ${{ steps.filter.outputs.frontend-docker }}
+      infra: ${{ steps.filter.outputs.infra }}
+      infra-docker: ${{ steps.filter.outputs.infra-docker }}
+      k8s: ${{ steps.filter.outputs.k8s }}
+      migration: ${{ steps.filter.outputs.migration }}
+      packages: ${{ steps.filter.outputs.packages }}
+      worker: ${{ steps.filter.outputs.worker }}
+      worker-docker: ${{ steps.filter.outputs.worker-docker }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          packages:
+            - 'src/**/packages.lock.json'
+            - 'test/**/packages.lock.json'
+          api:
+            - 'src/Api/**'
+            - 'src/Api.Abstractions/**'
+            - 'src/Api.Dto/**'
+            - 'src/Api.Services/**'
+            - 'src/Data/**'
+            - 'src/Data.Dto/**'
+            - 'test/Api.Test/**'
+            - 'test/Data.Test/**'
+            - 'test/Shared.Test/**'
+            - '!src/Api/Dockerfile'
+            - '!test/Api.Test/Dockerfile'
+          api-docker:
+            - 'src/Api/Dockerfile'
+          data:
+            - 'src/Data/**'
+            - 'src/Data.Dto/**'
+            - 'test/E2E.Test/**'
+            - 'test/Data.Test/**'
+          migration:
+            - 'src/Data/Migrations/**'
+          docker:
+            - 'scripts/docker-compose.*.yml'
+            - 'scripts/docker-compose.yml'
+            - 'scripts/.env'
+            - '.dockerignore'
+          docs:
+            - '.github/docs/**'
+            - 'README.md'
+          e2e:
+            - 'src/Api.Dto/**'
+            - 'src/Data/**'
+            - 'src/Data.Dto/**'
+            - 'test/Data.Seed.Test/**'
+            - 'test/E2E.Test/**'
+            - 'test/Data.Test/**'
+            - 'test/Shared.Test/**'
+            - '!test/E2E.Test/Dockerfile'
+          e2e-docker:
+            - 'test/E2E.Test/Dockerfile'
+          frontend:
+            - 'src/Api.Dto/**'
+            - 'src/Frontend/**'
+            - 'test/Frontend.Test/**'
+            - '!src/Frontend/Dockerfile'
+            - '!test/Frontend.Test/Dockerfile'
+          frontend-docker:
+            - 'src/Frontend/Dockerfile'
+          infra:
+            - 'src/Infrastructure/**'
+            - 'test/Infrastructure.Test/**'
+          infra-docker:
+            - 'src/Infrastructure/Dockerfile'
+          worker:
+            - 'src/Data/**'
+            - 'src/Data.Dto/**'
+            - 'src/Worker/**'
+            - 'src/Worker.Abstractions/**'
+            - 'src/Worker.Dto/**'
+            - 'src/Worker.Services/**'
+            - 'test/Data.Test/**'
+            - 'test/Shared.Test/**'
+            - 'test/Worker.Test/**'
+            - '!src/Worker/Dockerfile'
+            - '!test/Worker.Test/Dockerfile'
+          worker-docker:
+            - 'src/Worker/Dockerfile'
+          workflows:
+            - '.github/workflows/**'

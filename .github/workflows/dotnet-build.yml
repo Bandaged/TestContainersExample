@@ -1,0 +1,172 @@
+on: 
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      concurrency-group:
+        required: true
+        type: string
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      audit:
+        required: false
+        type: boolean
+        default: true
+      cache:
+        required: false
+        type: boolean
+        default: false
+      cache-key:
+        required: false
+        type: string
+        default: ''
+      cache-name:
+        required: false
+        type: string
+        default: default
+      build-target:
+        required: false
+        type: string
+        default: './Example.sln'
+      test-target:
+        required: false
+        type: string
+        default: './Example.sln'
+      build-config:
+        required: false
+        type: string
+        default: Release
+      dotnet-version:
+        required: false
+        type: string
+        default: '7.x'
+      unit-test:
+        required: false
+        type: boolean
+        default: true
+      publish-test-results:
+        required: false
+        type: boolean
+        default: true
+      sparse-checkout:
+        required: false
+        type: string
+        default: |
+          src/**
+          test/**
+          Example.sln
+    outputs:
+      cache-name:
+        description: "Name of published dotnet artifact" 
+        value: ${{ jobs.dotnet-build.outputs.artifact-name }}
+      package:
+        description: "Name of published dotnet package"
+        value: ${{ jobs.dotnet-build.outputs.package-name }}
+
+env:
+  cache-name: ${{ inputs.cache-name }}
+jobs:
+  dotnet-build:
+    runs-on: ${{ inputs.test-runner }}
+    concurrency:
+      group: ${{ inputs.concurrency-group }}
+      cancel-in-progress: true
+    outputs:
+      cache-key: ${{ steps.cache.outputs.cache-key }} 
+      artifact-name: ${{ steps.artifact-output.outputs.artifact-name }}
+      package-name: ${{ steps.publish-outputs.outputs.package-name }}
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: ${{ inputs.sparse-checkout }}
+      - name: dotnet-setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+      - name: dotnet-cache
+        id: cache
+        if: ${{ inputs.cache }}
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ inputs.cache-name }}-${{ hashFiles('**/*.csproj') }}${{ hashFiles('**/*.props') }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-${{ inputs.cache-name }}-${{ hashFiles('**/*.csproj') }}${{ hashFiles('**/*.props') }}-
+            ${{ runner.os }}-nuget-${{ inputs.cache-name }}-
+            ${{ runner.os }}-nuget-
+            ${{ runner.os }}-
+
+      - name: dotnet-restore
+        run: dotnet restore ${{ inputs.build-target }} --locked-mode -p:PublishReadyToRun=true
+
+      - name: dotnet-audit
+        run: dotnet audit ${{ inputs.build-target }}
+
+      - name: dotnet-restore-tests
+        if: ${{ (inputs.unit-test || inputs.integration-test) && inputs.test-target != inputs.build-target }}
+        run: dotnet restore ${{ inputs.test-target }} --locked-mode -p:PublishReadyToRun=true
+
+      - name: dotnet-audit
+        if: ${{ (inputs.unit-test || inputs.integration-test) && inputs.test-target != inputs.build-target }}
+        run: dotnet audit ${{ inputs.test-target }}
+
+      - name: dotnet-build
+        run: >
+          dotnet build 
+          ${{ inputs.build-target }}
+          --no-restore
+          -p:PublishReadyToRun=true
+          -c ${{ inputs.build-config }} 
+
+      - name: dotnet-build-test
+        if: ${{ ( inputs.unit-test || inputs.integration-test ) && inputs.test-target != inputs.build-target }}
+        run: >
+          dotnet build 
+          ${{ inputs.test-target }} 
+          --no-restore 
+          -p:PublishReadyToRun=true
+          -c ${{ inputs.build-config }} 
+
+      - name: dotnet-unit-test
+        if: ${{ inputs.unit-test }}
+        run: >
+          dotnet test 
+          ${{ inputs.test-target }} 
+          --no-build 
+          --nologo 
+          -c ${{ inputs.build-config }} 
+          -l trx 
+          --filter "TestType=Unit" 
+          --collect "XPlat Code Coverage"
+          --results-directory "build/TestResults/dotnet-${{ inputs.name }}-unit-test"
+
+      - name: dotnet-publish-unit-test-results
+        uses: actions/upload-artifact@v3
+        if: ${{ inputs.unit-test && inputs.publish-test-results && always() }}
+        with:
+          name: dotnet-results-${{ inputs.name }}-unit-test
+          path: build/TestResults/dotnet-${{ inputs.name }}-unit-test
+
+      - name: dotnet-integration-test
+        if: ${{ inputs.integration-test }}
+        run: >
+          dotnet test 
+          ${{ inputs.test-target }} 
+          --no-build 
+          --nologo 
+          -c ${{ inputs.build-config }} 
+          -l trx 
+          --filter "TestType=Integration" 
+          --collect "XPlat Code Coverage"
+          --results-directory "build/TestResults/dotnet-${{ inputs.name }}-integration-test"
+
+      - name: dotnet-publish-integration-test-results
+        uses: actions/upload-artifact@v3
+        if: ${{ inputs.integration-test && inputs.publish-test-results && always() }}
+        with:
+          name: dotnet-results-${{ inputs.name }}-integration-test
+          path: build/TestResults/dotnet-${{ inputs.name }}-integration-test

@@ -1,0 +1,99 @@
+on: 
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+      concurrency-group:
+        required: true
+        type: string
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      clean-up:
+        required: false
+        type: boolean
+        default: true
+
+      lint:
+        required: false
+        type: boolean
+        default: true
+
+      artifact:
+        required: false
+        type: boolean
+        default: false
+      artifact-name:
+        required: false
+        type: string
+        default: image
+
+      publish:
+        required: false
+        type: boolean
+        default: false
+
+      sparse-checkout:
+        required: false
+        type: string
+        default: |
+          src/**
+          test/**
+          scripts/docker-compose.yml
+          scripts/docker-compose.ci.yml
+          scripts/.env
+          Example.sln
+          .dockerignore
+    outputs:
+      component: 
+        description: "Name of component"
+        value: ${{ inputs.service-name }}
+      repo:
+        description: "Name of published image" 
+        value: ${{ jobs.docker-build.outputs.repo-name }}
+      image:
+        description: "Name of published image" 
+        value: ${{ jobs.docker-build.outputs.image-name }}
+      tag:
+        description: "Name of published image tag"
+        value: ${{ jobs.docker-build.outputs.tag-name }}
+env:
+  OVERRIDE_IMAGE_NAME: ${{ inputs.image-name }}
+  OVERRIDE_IMAGE_TAG: ${{ inputs.image-tag }}
+jobs:
+  docker-build:
+    runs-on: ${{ inputs.test-runner }}
+    concurrency:
+      group: ${{ inputs.concurrency-group }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: ${{ inputs.sparse-checkout }}
+      - name: docker-lint
+        if: ${{ inputs.lint }}
+        run: docker compose -f ./docker-compose.ci.yml run --rm -it lint-${{ inputs.service-name }}
+      - name: docker-build
+        run: docker compose build ${{ inputs.service-name }}
+      - name: docker-artifact
+        if: ${{ inputs.artifact }}
+        run: >
+          docker save 
+          -t "${OVERRIDE_IMAGE_NAME}:${OVERRIDE_IMAGE_TAG}" 
+          -o build/output/${{ inputs.service-name }}.tar
+      - name: docker-publish-artifact
+        if: ${{ inputs.artifact }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-${{ inputs.service-name }}
+          path: build/output/${{ inputs.service-name }}.tar
+      - name: docker-image-clean-up
+        if: ${{ always() }}
+        run: docker compose rmi
+      

@@ -1,33 +1,45 @@
+# IDE settings
 .vs/
 .vs/**/*
 .vs
 
+.vscode/
+.vscode/**/*
+.vscode
+
+# Dev Container settings
 .devcontainer/
 .devcontainer/**/*
 .devcontainer
 
+# git folders and details
 .git/
 .git/**/*
 .git
-
-.github/
-.github/**/*
-.github
-
 .gitignore
+**/.gitignore
 
+# kubernetes
 k8s/
 k8s/**/*
 k8s
 
+# github ci/cd and documents
+.github/
+.github/**/*
+.github
+
+# output folder for ci/cd
 build/
 build/**/*
 build
 
+# local secrets files
 secrets/
 secrets/**/*
 secrets
 
+# dotnet build output
 **/obj/
 **/obj/**/*
 **/obj
@@ -36,10 +48,15 @@ secrets
 **/bin/**/*
 **/bin
 
+# test results
+**/[tT]est[rR]esults/
+**/[tT]est[rR]esults/**/*
+**/[tT]est[rR]esults
 [tT]est[rR]esults/
 [tT]est[rR]esults/**/*
 [tT]est[rR]esults
 
+# docker files
 .env
 docker-compose.yml
 docker-compose.yaml
@@ -48,10 +65,14 @@ docker-compose.*.yaml
 **/[dD]ockerfile
 **/*.dockerfile
 
+# ignore documents
 **/*.md
 README.md
 
+# environment settings
 **/appsettings.*.json
 **/appsettings.*.yaml
+
+# local settings
 **/localsettings.json
 **/localsettings.yaml

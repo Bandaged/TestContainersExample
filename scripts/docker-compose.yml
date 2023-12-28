@@ -8,14 +8,14 @@ services:
     build:
       context: ../
       dockerfile: src/Frontend/Dockerfile
+  infra:
+    build:
+      context: ../
+      dockerfile: src/Infrastructure/Dockerfile
   worker:
     build:
       context: ../
       dockerfile: src/Worker/Dockerfile
-  infrastructure:
-    build:
-      context: ../
-      dockerfile: src/Infrastructure/Dockerfile
 configs:
   api_appsettings:
     file: ../src/Api/appsettings.Development.json

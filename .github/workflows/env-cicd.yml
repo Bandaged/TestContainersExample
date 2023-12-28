@@ -1,0 +1,139 @@
+on: 
+  workflow_call:
+    inputs:
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      
+      cache-name:
+        required: false
+        type: string
+        default: default
+
+      dotnet-version:
+        required: false
+        type: string
+        default: '7.x'
+
+      publish-image:
+        required: false
+        type: boolean
+        default: false
+      publish-chart:
+        required: false
+        type: boolean
+        default: false
+      publish-migrations:
+        required: false
+        type: boolean
+        default: false
+
+      image-repo:
+        required: false
+        type: string
+        default: ''
+      image-tag:
+        required: false
+        type: string
+        default: latest
+jobs: 
+# dotnet test
+  dotnet-test:
+    uses: './.github/workflow/dotnet-build.yml'
+    with:
+      name: 'full'
+      build-folder: ./Example.sln
+      test-folder: ./Example.sln
+      test-runner: ${{ inputs.test-runner }}
+
+# docker images
+  docker-build-api:
+    uses: './.github/workflow/docker-build.yml'
+    with: 
+      service-name: 'api'
+      concurrency-group: docker-api-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api/**
+        src/Api.Abstractions/**
+        src/Api.Dto/**
+        src/Api.Services/**
+        src/Data.Dto/**
+        src/Data/**
+        test/Api.Test/**
+        test/Data.Test/**
+        test/Shared.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+  docker-build-frontend:
+    uses: './.github/workflow/docker-build.yml'
+    needs: dotnet-test
+    with: 
+      service-name: 'frontend'
+      concurrency-group: docker-frontend-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api.Dto/**
+        src/Frontend/**
+        test/Frontend.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+  docker-build-worker:
+    uses: './.github/workflow/docker-build.yml'
+    needs: dotnet-test
+    with: 
+      service-name: 'worker'
+      concurrency-group: docker-worker-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api.Dto/**
+        src/Data.Dto/**
+        src/Data/**
+        src/Worker/**
+        src/Worker.Abstractions/**
+        src/Worker.Dto/**
+        src/Worker.Services/**
+        test/Data.Test/**
+        test/Shared.Test/**
+        test/Worker.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+  docker-build-infra:
+    uses: './.github/workflow/docker-build.yml'
+    needs: dotnet-test
+    with: 
+      service-name: 'infra'
+      concurrency-group: docker-infra-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Infrastructure/**
+        test/Infrastructure.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+  docker-build-e2e-test:
+    uses: './.github/workflow/docker-build.yml'
+    needs: dotnet-test
+    with:
+      service-name: 'e2e-test'
+      concurrency-group: docker-e2e-test-${{ github.workflow }}-${{ github.ref }}
+      sparse-checkout: |
+        src/Api.Dto/**
+        test/Data.Test/**
+        test/E2E.Test/**
+        test/Shared.Test/**
+        scripts/docker-compose.ci.yml
+        scripts/docker-compose.yml
+        scripts/.env
+        .dockerignore
+
+# k8s ci
+  helm-build:
+    uses: './.github/workflow/helm-build.yml'
+    with: 
+      name: chart
+      concurrency-group: helm-${{ github.workflow }}-${{ github.ref }}

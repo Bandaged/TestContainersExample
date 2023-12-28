@@ -1,0 +1,22 @@
+on: 
+  workflow_call:
+    inputs:
+      image-repo:
+        required: true
+        type: string
+      image-name:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+      test-runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+jobs:
+  image-clean-up:
+    runs-on: ${{ inputs.test-runner }}
+    steps:
+      - 
+    
