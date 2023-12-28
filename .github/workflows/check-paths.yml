@@ -98,7 +98,7 @@ jobs:
             - 'src/Data/**'
             - 'src/Data.Dto/**'
             - 'test/Api.Test/**'
-            - 'test/Data.Test/**'
+            - 'test/Data.Seed.Test/**'
             - 'test/Shared.Test/**'
             - '!src/Api/Dockerfile'
             - '!test/Api.Test/Dockerfile'
@@ -107,7 +107,7 @@ jobs:
           data:
             - 'src/Data/**'
             - 'src/Data.Dto/**'
-            - 'test/E2E.Test/**'
+            - 'test/Data.Seed.Test/**'
             - 'test/Data.Test/**'
           dotnet: 
             - 'src/**/*.cs'
@@ -164,7 +164,7 @@ jobs:
             - 'src/Worker.Abstractions/**'
             - 'src/Worker.Dto/**'
             - 'src/Worker.Services/**'
-            - 'test/Data.Test/**'
+            - 'test/Data.Seed.Test/**'
             - 'test/Shared.Test/**'
             - 'test/Worker.Test/**'
             - '!src/Worker/Dockerfile'

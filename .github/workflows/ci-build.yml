@@ -73,7 +73,7 @@ jobs:
         src/Data.Dto/**
         src/Data/**
         test/Api.Test/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/Shared.Test/**
         src/*.props
         test/*.props
@@ -93,7 +93,7 @@ jobs:
         src/Data.Dto/**
         src/Data/**
         test/Api.Test/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/Shared.Test/**
         src/*.props
         test/*.props
@@ -165,7 +165,7 @@ jobs:
         src/Worker.Abstractions/**
         src/Worker.Dto/**
         src/Worker.Services/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/Shared.Test/**
         test/Worker.Test/**
         src/*.props
@@ -186,7 +186,7 @@ jobs:
         src/Worker.Abstractions/**
         src/Worker.Dto/**
         src/Worker.Services/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/Shared.Test/**
         test/Worker.Test/**
         src/*.props
@@ -245,7 +245,7 @@ jobs:
       concurrency-group: docker-e2e-test-${{ inputs.concurrency-group }}
       sparse-checkout: |
         src/Api.Dto/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/E2E.Test/**
         test/Shared.Test/**
         src/*.props
