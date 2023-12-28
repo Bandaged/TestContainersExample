@@ -1,6 +1,7 @@
 ARG DOTNET_VERSION="8.0-alpine"
 FROM mcr.microsoft.com/dotnet/runtime-deps:${DOTNET_VERSION} as base
 WORKDIR /app
+USER $APP_UID
 
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} as restorepackages
 WORKDIR /src
