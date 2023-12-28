@@ -23,10 +23,6 @@ on:
         required: false
         type: string
         default: ''
-      cache-name:
-        required: false
-        type: string
-        default: default
       build-target:
         required: false
         type: string
@@ -57,6 +53,7 @@ on:
         default: |
           src/**
           test/**
+          *.props
           Example.sln
     outputs:
       cache-name:
@@ -93,15 +90,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ inputs.cache-name }}-${{ hashFiles('**/*.csproj') }}${{ hashFiles('**/*.props') }}-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-${{ inputs.cache-name }}-${{ hashFiles('**/*.csproj') }}${{ hashFiles('**/*.props') }}-
-            ${{ runner.os }}-nuget-${{ inputs.cache-name }}-
-            ${{ runner.os }}-nuget-
-            ${{ runner.os }}-
+          key: ${{ inputs.cache-key }}
 
       - name: dotnet-restore
-        run: dotnet restore ${{ inputs.build-target }} --locked-mode -p:PublishReadyToRun=true
+        run: dotnet restore ${{ inputs.build-target }} --locked-mode
 
       - name: dotnet-audit
         run: dotnet audit ${{ inputs.build-target }}

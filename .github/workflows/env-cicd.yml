@@ -43,8 +43,6 @@ jobs:
     uses: './.github/workflow/dotnet-build.yml'
     with:
       name: 'full'
-      build-folder: ./Example.sln
-      test-folder: ./Example.sln
       test-runner: ${{ inputs.test-runner }}
 
 # docker images
@@ -75,8 +73,11 @@ jobs:
       concurrency-group: docker-frontend-${{ github.workflow }}-${{ github.ref }}
       sparse-checkout: |
         src/Api.Dto/**
+        src/*.props
         src/Frontend/**
         test/Frontend.Test/**
+        test/*.props
+        Directory.Build.props
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
         scripts/.env

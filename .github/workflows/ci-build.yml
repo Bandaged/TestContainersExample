@@ -8,7 +8,6 @@ on:
       concurrency-group:
         required: true
         type: string
-
       publish-image:
         required: false
         type: boolean
@@ -21,7 +20,6 @@ on:
         required: false
         type: boolean
         default: false
-
       image-repo:
         required: false
         type: string
@@ -30,6 +28,18 @@ on:
         required: false
         type: string
         default: latest
+      chart-repo:
+        required: false
+        type: string
+        default: ''
+      chart-name:
+        required: false
+        type: string
+        default: ''
+      chart-version:
+        required: false
+        type: string
+        default: ''
 jobs: 
 # job generate variables to filter
   paths-filter:
@@ -37,7 +47,10 @@ jobs:
     with:
       test-runner: ${{ inputs.test-runner }}
       concurrency-group: ${{ inputs.concurrency-group }}
-
+  dotnet-shared-cache:
+    needs: paths-filter
+    if: needs.path-filter.outputs.packages || needs.path-filter.outputs.dotnet 
+    uses: './.github/workflow/dotnet-shared-cache.yml'
 # api ci
   dotnet-build-api:
     uses: './.github/workflow/dotnet-build.yml'
@@ -58,6 +71,9 @@ jobs:
         test/Api.Test/**
         test/Data.Test/**
         test/Shared.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
   docker-build-api:
     uses: './.github/workflow/docker-build.yml'
     needs: paths-filter
@@ -75,6 +91,9 @@ jobs:
         test/Api.Test/**
         test/Data.Test/**
         test/Shared.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
         scripts/.env
@@ -94,6 +113,9 @@ jobs:
         src/Api.Dto/**
         src/Frontend/**
         test/Frontend.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
   docker-build-frontend:
     uses: './.github/workflow/docker-build.yml'
     needs: paths-filter
@@ -105,6 +127,9 @@ jobs:
         src/Api.Dto/**
         src/Frontend/**
         test/Frontend.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
         scripts/.env
@@ -131,6 +156,9 @@ jobs:
         test/Data.Test/**
         test/Shared.Test/**
         test/Worker.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
   docker-build-worker:
     uses: './.github/workflow/docker-build.yml'
     needs: paths-filter
@@ -149,6 +177,9 @@ jobs:
         test/Data.Test/**
         test/Shared.Test/**
         test/Worker.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
         scripts/.env
@@ -167,6 +198,9 @@ jobs:
       sparse-checkout: |
         src/Infrastructure/**
         test/Infrastructure.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
   docker-build-infra:
     uses: './.github/workflow/docker-build.yml'
     needs: paths-filter
@@ -177,6 +211,9 @@ jobs:
       sparse-checkout: |
         src/Infrastructure/**
         test/Infrastructure.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
         scripts/.env
@@ -195,6 +232,9 @@ jobs:
         test/Data.Test/**
         test/E2E.Test/**
         test/Shared.Test/**
+        src/*.props
+        test/*.props
+        Directory.Build.props
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
         scripts/.env

@@ -24,6 +24,9 @@ on:
       docker:
         description: Did shared docker source code change?
         value: ${{ jobs.paths-filter.outputs.docker }}
+      dotnet:
+        description: Did dotnet source code change?
+        value: ${{ jobs.paths-filter.outputs.dotnet }}
       e2e: 
         description: Did e2e source code change?
         value: ${{ jobs.paths-filter.outputs.e2e }}
@@ -68,6 +71,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       api-docker: ${{ steps.filter.outputs.api-docker }}
       data: ${{ steps.filter.outputs.data }}
+      dotnet: ${{ steps.filter.outputs.dotnet }}
       e2e: ${{ steps.filter.outputs.e2e }}
       e2e-docker: ${{ steps.filter.outputs.e2e-docker }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -86,9 +90,6 @@ jobs:
       id: filter
       with:
         filters: |
-          packages:
-            - 'src/**/packages.lock.json'
-            - 'test/**/packages.lock.json'
           api:
             - 'src/Api/**'
             - 'src/Api.Abstractions/**'
@@ -108,8 +109,22 @@ jobs:
             - 'src/Data.Dto/**'
             - 'test/E2E.Test/**'
             - 'test/Data.Test/**'
+          dotnet: 
+            - 'src/**/*.cs'
+            - 'test/**/*.cs'
+            - 'src/**/*.razor'
+            - 'src/**/*.cshtml'
+            - 'src/**/*.csproj'
+            - 'test/**/*.csproj'
+            - '*.sln'
+            - '*.props'
+            - 'src/*.props'
+            - 'test/*.props'
           migration:
             - 'src/Data/Migrations/**'
+          packages:
+            - 'src/**/packages.lock.json'
+            - 'test/**/packages.lock.json'
           docker:
             - 'scripts/docker-compose.*.yml'
             - 'scripts/docker-compose.yml'

@@ -1,7 +1,7 @@
 on: 
   workflow_call:
     inputs:
-      name:
+      cache-name:
         required: true
         type: string
       concurrency-group:
@@ -11,6 +11,10 @@ on:
         required: false
         type: string
         default: ubuntu-latest
+      dotnet-version:
+        required: false
+        type: string
+        default: '7.x'
     outputs:
       cache-key: ${{ jobs.shared-cache.outputs.cache-key }}
       cache-updated: ${{ jobs.shared-cache.outputs.cache-updated}}
@@ -25,13 +29,17 @@ jobs:
         with:
           sparse-checkout: |
             src/**/packages.lock.json
-            src/**/*.csproj
-            src/**/*.props
             test/**/packages.lock.json
+            src/**/*.csproj
             test/**/*.csproj
+            src/**/*.props
             test/**/*.props
             *.props
             Example.sln
+      - name: dotnet-setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
       - name: dotnet-cache
         id: restore-cache
         uses: actions/cache@v3
@@ -45,6 +53,7 @@ jobs:
         if: steps.restore-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
+          path: ~/.nuget/packages
           key: ${{ steps.restore-cache.outputs.cache-primary-key }}
       - name: dotnet-cache-updated
         run: echo "cache-updated=${{ steps.restore-cache.outputs.cache-hit }}" >> $GITHUB_OUTPUTS
