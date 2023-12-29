@@ -70,28 +70,31 @@ jobs:
 
       # move to tars
       - name: api-save-name
-        run: docker save -o build/output/api.tar ${{ inputs.api-image }}
+        run: docker save -o build/images/api.tar ${{ inputs.api-image }}
       - name: frontend-save-name
-        run: docker save -o build/output/frontend.tar ${{ inputs.frontend-image }}
+        run: docker save -o build/images/frontend.tar ${{ inputs.frontend-image }}
       - name: e2e-save-name
-        run: docker save -o build/output/e2e.tar ${{ inputs.e2e-image }}
+        run: docker save -o build/images/e2e.tar ${{ inputs.e2e-image }}
       - name: worker-save-name
-        run: docker save -o build/output/worker.tar ${{ inputs.worker-image }}
+        run: docker save -o build/images/worker.tar ${{ inputs.worker-image }}
 
       # k3s import
       - name: k3s-import-api
-        run: k3s ctr images import build/output/api.tar
+        run: k3s ctr images import build/images/api.tar
       - name: k3s-import-e2e
-        run: k3s ctr images import build/output/e2e.tar
+        run: k3s ctr images import build/images/e2e.tar
       - name: k3s-import-frontend
-        run: k3s ctr images import build/output/frontend.tar
+        run: k3s ctr images import build/images/frontend.tar
       - name: k3s-import-worker
-        run: k3s ctr images import build/output/worker.tar
+        run: k3s ctr images import build/images/worker.tar
 
       # clean up
       - name: clean-up-local-files
         if: ${{ always() && inputs.clean-up }}
         run: rm -rf build/output/chart
+      - name: clean-up-local-files
+        if: ${{ always() && inputs.clean-up }}
+        run: rm -rf build/images
       - name: remove-api-image
         if: ${{ always() && inputs.clean-up }}
         run: docker rmi ${{ inputs.api-image }}

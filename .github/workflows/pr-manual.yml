@@ -22,6 +22,20 @@ jobs:
     with:
       test-runner: ubuntu-latest
       concurrency-group: ${{ github.workflow }}-${{ github.ref }}
-      image-repo: ghrc.io
+      image-repo: ghrc.io/${{ github.organisation }}
+      chart-repo: ghrc.io/${{ github.organisation }}
+      chart-name: test-containers-example-chart
+      chart-version: pr-${{ github.workflow }}-${{ github.ref }}-${{ github.run_number }}
+      image-tag: pr-${{ github.workflow }}-${{ github.ref }}-${{ github.run_number }}
+      publish-chart: true
+      publish-image: true
+      api-image-name: test-containers-api
+      api-test-image-name: test-containers-api-tests
+      worker-image-name: test-containers-worker
+      worker-test-image-name: test-containers-worker-tests
+      data-test-image-name: test-containers-data-tests
+      frontend-image-name: test-containers-frontend
+      frontend-test-image-name: test-containers-frontend-tests
+      
       
   

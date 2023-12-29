@@ -1,21 +1,21 @@
 on: 
   workflow_call:
     inputs:
+      concurrency-group:
+        required: true
+        type: string
       test-runner:
         required: false
         type: string
         default: ubuntu-latest
-      
       cache-name:
         required: false
         type: string
         default: default
-
       dotnet-version:
         required: false
         type: string
         default: '7.x'
-
       publish-image:
         required: false
         type: boolean
@@ -37,6 +37,14 @@ on:
         required: false
         type: string
         default: latest
+      chart-repo:
+        required: false
+        type: string
+        default: ''
+      chart-version:
+        required: false
+        type: string
+        default: 'v1.0.0'
 jobs: 
 # dotnet test
   dotnet-shared-cache:
@@ -53,7 +61,7 @@ jobs:
     uses: './.github/workflow/docker-build.yml'
     with: 
       service-name: 'api'
-      concurrency-group: docker-api-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: docker-api-${{ inputs.concurrency-group }}
       sparse-checkout: |
         src/Api/**
         src/Api.Abstractions/**
@@ -62,7 +70,7 @@ jobs:
         src/Data.Dto/**
         src/Data/**
         test/Api.Test/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/Shared.Test/**
         scripts/docker-compose.ci.yml
         scripts/docker-compose.yml
@@ -73,7 +81,7 @@ jobs:
     needs: dotnet-test
     with: 
       service-name: 'frontend'
-      concurrency-group: docker-frontend-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: docker-frontend-${{ inputs.concurrency-group }}
       sparse-checkout: |
         src/Api.Dto/**
         src/*.props
@@ -90,7 +98,7 @@ jobs:
     needs: dotnet-test
     with: 
       service-name: 'worker'
-      concurrency-group: docker-worker-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: docker-worker-${{ inputs.concurrency-group }}
       sparse-checkout: |
         src/Api.Dto/**
         src/Data.Dto/**
@@ -99,7 +107,7 @@ jobs:
         src/Worker.Abstractions/**
         src/Worker.Dto/**
         src/Worker.Services/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/Shared.Test/**
         test/Worker.Test/**
         scripts/docker-compose.ci.yml
@@ -111,7 +119,7 @@ jobs:
     needs: dotnet-test
     with: 
       service-name: 'infra'
-      concurrency-group: docker-infra-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: docker-infra-${{ inputs.concurrency-group }}
       sparse-checkout: |
         src/Infrastructure/**
         test/Infrastructure.Test/**
@@ -124,10 +132,10 @@ jobs:
     needs: dotnet-test
     with:
       service-name: 'e2e-test'
-      concurrency-group: docker-e2e-test-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: docker-e2e-test-${{ inputs.concurrency-group }}
       sparse-checkout: |
         src/Api.Dto/**
-        test/Data.Test/**
+        test/Data.Seed.Test/**
         test/E2E.Test/**
         test/Shared.Test/**
         scripts/docker-compose.ci.yml
@@ -140,4 +148,4 @@ jobs:
     uses: './.github/workflow/helm-build.yml'
     with: 
       name: chart
-      concurrency-group: helm-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: helm-${{ inputs.concurrency-group }}

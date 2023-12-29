@@ -2,15 +2,19 @@ on:
   workflow_call:
     inputs:
       migration:
-        required: true
+        required: false
         type: boolean
         default: true
       migration-name:
         required: false
         type: string
         default: migration
+      image-repo:
+        required: false
+        type: string
+        default: ''
       api:
-        required: true
+        required: false
         type: boolean
         default: true
       api-image-name:
@@ -18,7 +22,7 @@ on:
         type: string
         default: api
       api-test:
-        required: true
+        required: false
         type: boolean
         default: true
       api-test-image-name:
@@ -26,7 +30,7 @@ on:
         type: string
         default: api-test
       e2e-test:
-        required: true
+        required: false
         type: boolean
         default: true
       e2e-test-image-name:
@@ -34,7 +38,7 @@ on:
         type: string
         default: e2e-test
       frontend:
-        required: true
+        required: false
         type: boolean
         default: true
       frontend-image-name:
@@ -42,7 +46,7 @@ on:
         type: string
         default: frontend
       frontend-test:
-        required: true
+        required: false
         type: boolean
         default: true
       frontend-test-image-name:
@@ -50,7 +54,7 @@ on:
         type: string
         default: frontend-test
       worker:
-        required: true
+        required: false
         type: boolean
         default: true
       worker-image-name:
@@ -58,13 +62,29 @@ on:
         type: string
         default: worker
       worker-test:
-        required: true
+        required: false
         type: boolean
         default: true
       worker-test-image-name:
         required: false
         type: string
         default: worker-test
+      chart:
+        required: false
+        type: boolean
+        default: true
+      chart-repo:
+        required: false
+        type: string
+        default: ghrc.io/${{ github.organisation }}
+      chart-name:
+        required: false
+        type: string
+        default: example-chart
+      chart-version:
+        required: false
+        type: string
+        default: latest
 jobs:
   docker-api-clean-up:
     uses: './.github/workflow/image-clean-up.yml'
@@ -111,6 +131,6 @@ jobs:
     if: ${{ always() && inputs.e2e-test }}
     with:
       test-runner: ${{ inputs.test-runner }}
-      image-repo: ${{ inputs.image-repo }}
-      image-name: ${{ inputs.e2e-test-image-name }}
-      image-tag: ${{ inputs.image-tag }}
+      helm-repo: ${{ inputs.chart-repo }}
+      cache-name: ${{ inputs.e2e-test-image-name }}
+      cache-version: ${{ inputs.chart-version }}
