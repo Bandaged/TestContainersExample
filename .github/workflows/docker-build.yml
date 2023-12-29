@@ -95,8 +95,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: docker-${{ inputs.service-name }}
-          path: build/output/${{ inputs.service-name }}.tar
+          path: build/images/${{ inputs.service-name }}.tar
       - name: docker-image-clean-up
         if: ${{ always() }}
-        run: docker compose rmi
+        run: docker compose rmi ${{ inputs.service-name }}
       

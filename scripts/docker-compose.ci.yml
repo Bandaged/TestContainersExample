@@ -5,102 +5,102 @@ services:
     volumes:
       - src/Api:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-api
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-api
   lint-api-test:
     image: hadolint/hadolint
     volumes:
       - test/Api.Test:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-api-test
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-api-test
   api-test:
     image: ${API_TEST_IMAGE}:${API_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Api.Test/Dockerfile
+      dockerfile: test/Api.Test/Containerfile
   api-performance-test:
     image: ${API_PERFORMANCE_TEST_IMAGE}:${API_PERFORMANCE_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Api.Performance.Test/Dockerfile
+      dockerfile: test/Api.Performance.Test/Containerfile
   lint-frontend:
     image: hadolint/hadolint
     volumes:
       - src/Frontend:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-frontend
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-frontend
   lint-frontend-test:
     image: hadolint/hadolint
     volumes:
       - test/Frontend.Test:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-frontend-test
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-frontend-test
   frontend-test:
     image: ${FRONTEND_TEST_IMAGE}:${FRONTEND_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Frontend.Test/Dockerfile
+      dockerfile: test/Frontend.Test/Containerfile
   frontend-performance-test:
     image: ${FRONTEND_PERFORMANCE_TEST_IMAGE}:${FRONTEND_PERFORMANCE_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Frontend.Performance.Test/Dockerfile
+      dockerfile: test/Frontend.Performance.Test/Containerfile
   lint-worker:
     image: hadolint/hadolint
     volumes:
       - src/Worker:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-worker
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-worker
   lint-worker-test:
     image: hadolint/hadolint
     volumes:
       - test/Worker.Test:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-worker-test
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-worker-test
   worker-test:
     image: ${WORKER_TEST_IMAGE}:${WORKER_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Worker.Test/Dockerfile
+      dockerfile: test/Worker.Test/Containerfile
   worker-performance-test:
     image: ${WORKER_PERFORMANCE_TEST_IMAGE}:${WORKER_PERFORMANCE_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Worker.Performance.Test/Dockerfile
+      dockerfile: test/Worker.Performance.Test/Containerfile
   lint-data-test:
     image: hadolint/hadolint
     volumes:
       - test/Data.Test:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-data-test
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-data-test
   data-test:
     image: ${DATA_TEST_IMAGE}:${DATA_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Data.Test/Dockerfile
+      dockerfile: test/Data.Test/Containerfile
   lint-infra-test:
     image: hadolint/hadolint
     volumes:
       - test/Infrastructure.Test:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-infra-test
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-infra-test
   infra-test:
     image: ${INFRA_TEST_IMAGE}:${INFRA_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/Infrastructure.Test/Dockerfile
+      dockerfile: test/Infrastructure.Test/Containerfile
   lint-e2e-test:
     image: hadolint/hadolint
     volumes:
       - test/E2E.Test:/src:ro
       - build/docker-lint:/output
-    command: hadolint /src/Dockerfile --file-path-in-report /output/docker-lint-e2e-test
+    command: hadolint /src/Containerfile --file-path-in-report /output/docker-lint-e2e-test
   e2e-test:
     image: ${E2E_TEST_IMAGE}:${E2E_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/E2E.Test/Dockerfile
+      dockerfile: test/E2E.Test/Containerfile
   e2e-performance-test:
     image: ${E2E_PERFORMANCE_TEST_IMAGE}:${E2E_PERFORMANCE_TEST_TAG}
     build:
       context: ../
-      dockerfile: test/E2E.Performance.Test/Dockerfile
+      dockerfile: test/E2E.Performance.Test/Containerfile

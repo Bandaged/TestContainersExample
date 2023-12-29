@@ -15,10 +15,16 @@ on:
         type: string
         default: ubuntu-latest
 permissions:
+  contents: read
   packages: write
 jobs:
   helm-clean-up:
     runs-on: ${{ inputs.test-runner }}
     steps:
-      - 
+      - name: delete-helm-chart
+        uses: actions/delete-package-versions@v4
+        with:
+          package-version-ids: ${{ inputs.chart-version }}
+          package-name: ${{ inputs.helm-repo }}/${{ inputs.chart-name }}
+          package-type: container # stored as oci standard
   

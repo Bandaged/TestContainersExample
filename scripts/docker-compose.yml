@@ -1,21 +1,40 @@
 version: '3.9'
 services:
+  mq:
+    image: rabbitmq
+  db:
+    image: mssql
+  cache: 
+    image: redis
   api:
     build:
       context: ../
-      dockerfile: src/Api/Dockerfile
+      dockerfile: src/Api/Containerfile
+    configs:
+      - target: /app/appsettings.Development.json
+        source: api_appsettings
+        mode: 0444
+
   frontend:
     build:
       context: ../
-      dockerfile: src/Frontend/Dockerfile
+      dockerfile: src/Frontend/Containerfile
+    configs:
+      - target: /app/wwwroot/appsettings.Development.json
+        source: frontend_appsettings
+        mode: 0444
   infra:
     build:
       context: ../
-      dockerfile: src/Infrastructure/Dockerfile
+      dockerfile: src/Infrastructure/Containerfile
   worker:
     build:
       context: ../
-      dockerfile: src/Worker/Dockerfile
+      dockerfile: src/Worker/Containerfile
+    configs:
+      - target: /app/wwwroot/appsettings.Development.json
+        source: worker_appsettings
+        mode: 0444
 configs:
   api_appsettings:
     file: ../src/Api/appsettings.Development.json
