@@ -7,6 +7,10 @@ secrets
 build/
 build/**/*
 build
+!scripts/build/
+!scripts/build
+!scripts/build/**/*
+
 
 # dotnet build output
 **/obj/
