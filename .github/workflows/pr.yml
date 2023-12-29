@@ -3,10 +3,89 @@ on:
     branches:
       - 'main'
       - 'releases/**'
+  workflow_dispatch:
+    inputs:
+      test-runner:
+        description: test runner type
+        type: string
+        required: false
+        default: ubuntu-latest
+      unit-test:
+        description: Run Unit tests
+        required: false
+        type: boolean
+        default: true
+      integration-test:
+        description: Run Integration tests
+        required: false
+        type: boolean
+        default: false
+      e2e-test:
+        description: Run E2E tests
+        required: false
+        type: boolean
+        default: false
+env:
+  image-repo: ghrc.io/${{ github.organisation }}
+  chart-repo: ghrc.io/${{ github.organisation }}
+  pr-version: ${{ github.workflow }}-${{ github.ref }}-${{ github.run_number }}
+  concurrency-base: ${{ github.workflow }}-${{ github.ref }}
+  chart-prefix: pr-test-containers-
+  image-prefix: pr-test-containers-
 jobs:
   ci-build:
     uses: './.github/workflows/ci-build.yml'
     with:
+      test-runner: ${{inputs.test-runner}}
+      concurrency-group: ${{ env.concurrency-base }}
+      integration-test: ${{ inputs.integration-test }}
+      unit-test: ${{ inputs.unit-test }}
+      publish-chart: ${{ inputs.e2e-test }}
+      chart-repo:  ${{ env.chart-repo }}
+      chart-name: ${{env.chart-prefix}}example-chart
+      chart-version: ${{ env.pr-version }}
+      publish-image: ${{ inputs.e2e-test }}
+      image-repo: ${{ env.image-repo }}
+      api-image-name: ${{env.image-prefix}}api
+      api-test-image-name: ${{env.image-prefix}}api-tests
+      worker-image-name: ${{env.image-prefix}}worker
+      worker-test-image-name: ${{env.image-prefix}}worker-tests
+      data-test-image-name: ${{env.image-prefix}}data-tests
+      frontend-image-name: ${{env.image-prefix}}frontend
+      frontend-test-image-name: ${{env.image-prefix}}frontend-tests
+      image-tag: ${{ env.pr-version }}
+  ci-k3s-test:
+    if: ${{ inputs.e2e-test && success() }}
+    needs: ci-build
+    uses: './.github/workflows/k3-test.yml'
+    with:
       test-runner: ubuntu-latest
-      concurrency-group: pr-${{ github.workflow }}-${{ github.ref }}-${{ github.run_number }}
+      concurrency-group: ${{ env.concurrency-base }}
+      unit-test: ${{ inputs.unit-test }}
+      publish-chart: ${{ inputs.e2e-test }}
+      chart-repo:  ${{ env.chart-repo }}
+      chart-name: ${{env.chart-prefix}}example-chart
+      api-image-name: ${{ env.chart-repo }}/${{env.image-prefix}}api:${{env.pr-version}}
+      api-test-image-name: ${{ env.chart-repo }}/${{env.image-prefix}}api-tests:${{env.pr-version}}
+      worker-image-name: ${{ env.chart-repo }}/${{env.image-prefix}}worker:${{env.pr-version}}
+      worker-test-image-name: ${{ env.image-prefix }}worker-tests:${{env.pr-version}}
+      data-test-image-name: ${{ env.chart-repo }}/${{env.image-prefix}}data-tests:${{env.pr-version}}
+      frontend-image-name: ${{ env.chart-repo }}/${{env.image-prefix}}frontend:${{env.pr-version}}
+      frontend-test-image-name: ${{ env.chart-repo }}/${{env.image-prefix}}frontend-tests:${{env.pr-version}}
+  ci-clean-up:
+    uses: './.github/workflows/ci-clean-up.yml'
+    if: ${{ always() }}
+    with:
+      test-runner: ubuntu-latest
+      chart-repo: ghrc.io/${{ github.organisation }}
+      chart-name: test-containers-example-chart
+      chart-version: pr-${{ github.workflow }}-${{ github.ref }}-${{ github.run_number }}
+      image-repo: ghrc.io/${{ github.organisation }}
+      api-image-name: test-containers-api
+      api-test-image-name: test-containers-api-tests
+      worker-image-name: test-containers-worker
+      worker-test-image-name: test-containers-worker-tests
+      data-test-image-name: test-containers-data-tests
+      frontend-image-name: test-containers-frontend
+      frontend-test-image-name: test-containers-frontend-tests
   

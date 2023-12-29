@@ -59,6 +59,9 @@ jobs:
     needs: paths-filter
     if: needs.path-filter.outputs.packages || needs.path-filter.outputs.dotnet 
     uses: './.github/workflow/dotnet-shared-cache.yml'
+# TODO generate docker matrix
+# TODO change dotnet build/test to matrix
+# TODO change docker build to matrix
 # api ci
   dotnet-build-api:
     uses: './.github/workflow/dotnet-build.yml'

@@ -147,6 +147,7 @@ jobs:
         with:
           name: dotnet-results-${{ inputs.name }}-unit-test
           path: build/TestResults/dotnet-${{ inputs.name }}-unit-test
+          retention-days: 1
 
       - name: dotnet-integration-test
         if: ${{ inputs.integration-test }}
@@ -167,3 +168,4 @@ jobs:
         with:
           name: dotnet-results-${{ inputs.name }}-integration-test
           path: build/TestResults/dotnet-${{ inputs.name }}-integration-test
+          retention-days: 1

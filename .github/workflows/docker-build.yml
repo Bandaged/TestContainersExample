@@ -89,13 +89,15 @@ jobs:
         run: >
           docker save 
           -t "${OVERRIDE_IMAGE_NAME}:${OVERRIDE_IMAGE_TAG}" 
-          -o build/output/${{ inputs.service-name }}.tar
+          -o build/images/${{ inputs.service-name }}.tar
       - name: docker-publish-artifact
         if: ${{ inputs.artifact }}
         uses: actions/upload-artifact@v3
         with:
           name: docker-${{ inputs.service-name }}
           path: build/images/${{ inputs.service-name }}.tar
+          retention-days: 1
+          compression-level: 0
       - name: docker-image-clean-up
         if: ${{ always() }}
         run: docker compose rmi ${{ inputs.service-name }}
